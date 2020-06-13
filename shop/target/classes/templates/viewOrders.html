@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Comenzi</title>
+    <link rel="stylesheet" type="text/css" href="../../shoppingCart.css" th:href="@{/shoppingCart.css}">
+</head>
+<body>
+
+
+<div class="row">
+    <div class="col-75">
+        <div class="container">
+            <!--<form action="#" th:action="@{/confirmOrder}" method="post">-->
+
+                <div class="row">
+                    <div class="col-50">
+                        <h3>Comenzi</h3>
+
+                        <div th:if="${unprocessedOrders != null}">
+                            <div  th:each="order : ${unprocessedOrders}">
+                                <br>
+                                    <span th:text="${order.name}" class="fa fa-user">...</span>
+                                    <span th:text="${order.county}" class="fa fa-user">...</span>
+                                    <span th:text="${order.city}" class="fa fa-user">...</span>
+                                    <span th:text="${order.street}" class="fa fa-user">...</span>
+                                    <span th:text="${order.tolalOrderPrice}" class="fa fa-user">...</span>
+                                <br>
+                                    <a th:href="@{confirmOrder/__${order.id}__}" type="submit" value="Confirma comanda" > Confirma Comanda</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <!--</form>-->
+        </div>
+    </div>
+</div>
+</body>
+</html>

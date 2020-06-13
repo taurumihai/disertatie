@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Finalizare comanda</title>
+    <link rel="stylesheet" type="text/css" href="../../shoppingCart.css" th:href="@{/shoppingCart.css}">
+</head>
+<body>
+
+<div class="row">
+    <div class="col-75">
+        <div class="container">
+            <form action="#" th:action="@{/finalizeOrder}" method="post">
+
+                <div class="row">
+                    <div class="col-50">
+                        <h3>Produse</h3>
+
+                        <div th:if="${productList != null}">
+                            <div  th:each="product : ${productList}">
+                                <p>
+                                    <span th:text="${product.name}" class="fa fa-user"></span>
+                                    <span th:text="${product.name}" class="fa fa-user">...</span>
+                                    <span th:text="${product.description}" class="fa fa-user">...</span>
+                                    <span th:text="${product.price}" class="fa fa-user">...</span>
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p>Total <span class="price" style="color:black"><b><span th:text="${totalPrice}"></span></b></span></p>
+
+                <div th:if="${!hideSendOrder}">
+                    <input type="submit" value="Send order" class="btn">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:if="${orderProcesed != null}">
+    <span th:text="${orderProcesed}"></span>
+</div>
+
+</body>
+</html>

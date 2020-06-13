@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add products</title>
+    <link rel="stylesheet" type="text/css" href="../../shoppingCart.css" th:href="@{/shoppingCart.css}">
+    <!--<link rel="stylesheet" type="text/css" href="../../welcomeCSS.css" th:href="@{/welcomeCSS.css}">-->
+</head>
+</head>
+<body>
+
+<div class="row">
+    <div class="col-75">
+        <div class="container">
+            <form action="#" th:action="@{/addProducts}" method="post">
+
+                <div class="row">
+                    <div class="col-50">
+                        <h3>Adaugare Produs</h3>
+                        <label><i class="fa fa-user"></i> Denumire produs</label>
+                        <input type="text" id="productName" name="productName" placeholder="Produs">
+                        <label><i class="fa fa-envelope"></i> Descriere</label>
+                        <input type="text" id="description" name="description" placeholder="Descriere">
+                        <label><i class="fa fa-address-card-o"></i> Detalii</label>
+                        <input type="text" id="details" name="details" placeholder="Detalii">
+                        <div class="dropdown">
+                            <select class="dropdown-content" name="category">
+                                <option value="ELECTROCASNICE">Electrocasnice</option>
+                                <option value="DIGITALE">Digitale</option>
+                                <option value="CONSTRUCTII">Materiale</option>
+                            </select>
+                        </div>
+                        <br>
+
+                        <div class="row">
+                            <div class="col-50">
+                                <label for="price">Pret </label>
+                                <input type="text" id="price" name="price" placeholder="Pret">
+                            </div>
+                            <div class="col-50">
+                                <label for="stock">Stoc</label>
+                                <input type="text" id="stock" name="stock" placeholder="Stoc disponibil">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <input type="submit" value="Adauga produs" class="btn">
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:if="${missingFields != null}">
+    <span th:text="${missingFields}"></span>
+</div>
+
+
+</body>
+</html>

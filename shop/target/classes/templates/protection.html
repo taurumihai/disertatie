@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Protection Materials</title>
+    <link rel="stylesheet" type="text/css" href="../../table.css" th:href="@{/table.css}">
+</head>
+<body>
+
+
+<table>
+    <tr>
+        <td>Produs</td>
+        <td>Descriere</td>
+        <td>Pret</td>
+    </tr>
+    <th:block th:each="product : ${allProductsLits}">
+        <tr>
+            <td th:text="${product.name}">...</td>
+            <td th:text="${product.description}">...</td>
+            <td th:text="${product.price}">...</td>
+            <td>
+                <a th:href="@{productDetails/__${product.id}__}" class="btn btn-danger">Detalii</a>
+            </td>
+        </tr>
+    </th:block>
+</table>
+</body>
+</html>
