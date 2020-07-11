@@ -27,7 +27,6 @@ public class HomeController {
     @Autowired
     private RolesService rolesService;
 
-
     @RequestMapping("/")
     public String viewHome() {
 
@@ -79,13 +78,13 @@ public class HomeController {
     public String loginView(String username, String password, Model model, HttpSession session, HttpServletRequest request) throws BullShopError {
 
         session = request.getSession(true);
-        User loggedUser = (User) session.getAttribute("loggedUser");
 
-        if (loggedUser != null) {
+        if ((User) session.getAttribute("loggedUser") != null) {
             return "welcome";
         }
 
         User checkUser = userService.findUserByUsername(username);
+
 
         if (StringUtils.isNullOrEmpty(username) || StringUtils.isNullOrEmpty(password)) {
             // eroarea aici si nu in if pt ca la prima accesare apare mesajul. Vreau sa apara cand nu completeaza vreun camp
@@ -101,9 +100,9 @@ public class HomeController {
 
             if (checkUser.getRoles() == null) {
                 checkUser.setRoles(adminRole);
-                userService.saveUser(checkUser);
             }
 
+            userService.saveUser(checkUser);
             session.setAttribute("loggedUser", checkUser);
             return "adminView";
         }
@@ -111,6 +110,7 @@ public class HomeController {
         if (checkUser != null && checkUser.getRoles() != adminRole) {
 
             session.setAttribute("loggedUser", checkUser);
+
             if (password.equals(checkUser.getPassword())) {
 
                 if (checkUser.getRoles() == null) {

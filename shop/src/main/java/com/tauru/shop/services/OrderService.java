@@ -3,7 +3,6 @@ package com.tauru.shop.services;
 
 import com.tauru.shop.entities.Order;
 import com.tauru.shop.repositories.OrderRepository;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,10 +27,9 @@ public class OrderService {
 
     public List<Order> getAllUnprocessedOrders() {
 
-        List<Order> allOrders = orderRepository.findAll();
         List<Order> unprocessedOrders = new ArrayList<>();
 
-        for (Order order : allOrders) {
+        for (Order order : orderRepository.findAll()) {
             if (!order.getOrderIsProcessed()) unprocessedOrders.add(order);
         }
 
@@ -42,4 +40,5 @@ public class OrderService {
 
         return orderRepository.findOrderById(orderId);
     }
+
 }

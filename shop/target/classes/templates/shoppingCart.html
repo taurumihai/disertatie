@@ -54,20 +54,15 @@
                         <a th:href="@{productDetails/__${product.id}__}">
                             <span th:text="${product.name}"></span>
                             <span th:text="${product.details}">...</span>
-                            <span th:text="${product.description}">...</span>
+                            <!--<span th:text="${product.description}">...</span>-->
+                            <label>Pret</label>
                             <span th:text="${product.price}">...</span>
                          </a>
                     </p>
                 </div>
             </div>
-
-
-            <!--<p><a href="#">Product 1</a> <span class="price">$15</span></p>-->
-            <!--<p><a href="#">Product 2</a> <span class="price">$5</span></p>-->
-            <!--<p><a href="#">Product 3</a> <span class="price">$8</span></p>-->
-            <!--<p><a href="#">Product 4</a> <span class="price">$2</span></p>-->
             <hr>
-            <p>Total <span class="price" style="color:black"><b><span th:text="${totalPrice}"></span></b></span></p>
+            <p>Pret total <span class="price" style="color:black"><b><span th:text="${totalPrice}"></span></b></span></p>
 
             <a href="/welcome" class="btn", style="margin-top:50px, margin-left:30px"> Continua cumparaturile </a>
         </div>

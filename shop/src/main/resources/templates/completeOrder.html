@@ -20,7 +20,6 @@
                             <div  th:each="product : ${productList}">
                                 <p>
                                     <span th:text="${product.name}" class="fa fa-user"></span>
-                                    <span th:text="${product.name}" class="fa fa-user">...</span>
                                     <span th:text="${product.description}" class="fa fa-user">...</span>
                                     <span th:text="${product.price}" class="fa fa-user">...</span>
                                     </a>
@@ -29,7 +28,7 @@
                         </div>
                     </div>
                 </div>
-                <p>Total <span class="price" style="color:black"><b><span th:text="${totalPrice}"></span></b></span></p>
+                <p>Pret Total <span class="price" style="color:black"><b><span th:text="${totalPrice}"></span></b></span></p>
 
                 <div th:if="${!hideSendOrder}">
                     <input type="submit" value="Send order" class="btn">
@@ -41,6 +40,8 @@
 
 <div th:if="${orderProcesed != null}">
     <span th:text="${orderProcesed}"></span>
+    <br><br><br><br>
+    <a href="/welcome" class="btn", style="margin-top:50px, margin-left:30px"> Inapoi catre prima pagina </a>
 </div>
 
 </body>

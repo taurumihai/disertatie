@@ -4,9 +4,24 @@
     <meta charset="UTF-8">
     <title>Protection Materials</title>
     <link rel="stylesheet" type="text/css" href="../../table.css" th:href="@{/table.css}">
+    <link rel="stylesheet" type="text/css" href="../../welcomeCSS.css" th:href="@{/welcomeCSS.css}">
 </head>
 <body>
 
+<div class="navbar">
+    <a href="#welcome">Home</a>
+    <a href="#news">News</a>
+    <div class="dropdown">
+        <button class="dropbtn">Categorii
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="/protection">Materiale protectie</a>
+            <a href="/electronics">Electronice</a>
+            <a href="/digitals">Digitale</a>
+        </div>
+    </div>
+</div>
 
 <table>
     <tr>

@@ -2,7 +2,6 @@ package com.tauru.shop.controllers;
 
 
 import com.tauru.shop.entities.*;
-import com.tauru.shop.enums.ProductCategoryEnum;
 import com.tauru.shop.services.*;
 import com.tauru.shop.utilitare.BullShopError;
 import com.tauru.shop.utilitare.StringUtils;
@@ -52,7 +51,7 @@ public class ShoppingCartController {
         User loggedUser = (User) session.getAttribute("loggedUser");
         Address checkAddress = new Address();
 
-        if (loggedUser.getRoles() != rolesService.findRoleById((long) 2)) {
+        if (loggedUser != null && loggedUser.getRoles() != rolesService.findRoleById((long) 2)) {
             checkAddress = addressService.findAddressByUserId(loggedUser.getId());
         }
 
@@ -142,7 +141,9 @@ public class ShoppingCartController {
 
             for (Product product : productList) {
                 totalPriceForProducts += product.getPrice();
-
+                Integer currentStock = product.getStockNumber();
+                product.setStockNumber(currentStock - 1);
+                productService.saveProduct(product);
             }
             model.addAttribute("totalPrice", totalPriceForProducts);
         }
@@ -155,26 +156,5 @@ public class ShoppingCartController {
         return "completeOrder";
     }
 
-    @RequestMapping("/addProducts")
-    public String addProductsView(String category, String productName,
-                                  String description, String details,
-                                  String price, String stock, Model model) {
 
-
-
-        if (StringUtils.isNullOrEmpty(productName) || StringUtils.isNullOrEmpty(description) || StringUtils.isNullOrEmpty(details)
-            || StringUtils.isNullOrEmpty(price) || StringUtils.isNullOrEmpty(stock)) {
-
-            model.addAttribute("missingFields", "Completati toate campurile");
-            return "addProducts";
-        }
-
-        Product newProduct = new Product(productName, Double.parseDouble(price), Integer.parseInt(stock), ProductCategoryEnum.valueOf(category));
-        newProduct.setDescription(description);
-        newProduct.setDetails(details);
-
-        productService.saveProduct(newProduct);
-
-        return "addProducts";
-    }
 }

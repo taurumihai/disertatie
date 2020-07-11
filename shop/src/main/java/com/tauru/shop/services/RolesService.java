@@ -21,4 +21,11 @@ public class RolesService {
         return roleRepository.findRoleById(roleId);
     }
 
+
+    public void saveRoles(Roles roles) {
+
+        if (roles != null) {
+            roleRepository.save(roles);
+        }
+    }
 }

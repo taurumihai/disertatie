@@ -2,10 +2,12 @@ package com.tauru.shop.controllers;
 
 
 import com.tauru.shop.entities.Order;
+import com.tauru.shop.entities.Product;
+import com.tauru.shop.enums.ProductCategoryEnum;
 import com.tauru.shop.services.OrderService;
+import com.tauru.shop.services.ProductService;
+import com.tauru.shop.utilitare.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
-import org.springframework.session.Session;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -22,6 +23,9 @@ public class AdminController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private ProductService productService;
 
     @RequestMapping(value = {"/viewOrders"})
     public String viewOrdersView(Model model, String processCommand) {
@@ -37,7 +41,10 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/confirmOrder/{id}")
-    public String confirmOrderView(@PathVariable(name = "id") String orderId, Model model, HttpSession session, HttpServletRequest request, String processCommand) {
+    public String confirmOrderView(@PathVariable(name = "id") String orderId,
+                                   Model model, HttpSession session,
+                                   HttpServletRequest request,
+                                   String processCommand) {
 
         session = request.getSession(true);
         Order currentOrder = orderService.findOrderById(Long.valueOf(orderId));
@@ -81,6 +88,71 @@ public class AdminController {
             orderService.saveOrder(confirmOrder);
         }
 
+
+        return "adminView";
+    }
+
+    @RequestMapping(value = {"/addProducts"})
+    public String addProductsView(String category, String productName,
+                                  String description, String details,
+                                  String price, String stock, Model model) {
+
+        if (StringUtils.isNullOrEmpty(productName) || StringUtils.isNullOrEmpty(description) || StringUtils.isNullOrEmpty(details)
+                || StringUtils.isNullOrEmpty(price) || StringUtils.isNullOrEmpty(stock)) {
+
+            model.addAttribute("missingFields", "Completati toate campurile");
+            return "addProducts";
+        }
+
+        Product newProduct = new Product(productName, Double.parseDouble(price), Integer.parseInt(stock), ProductCategoryEnum.valueOf(category));
+        newProduct.setDescription(description);
+        newProduct.setDetails(details);
+
+        productService.saveProduct(newProduct);
+
+        return "addProducts";
+    }
+
+    @RequestMapping("/viewStock")
+    public String updateStockView(Model model) {
+
+        List<Product> productsWithoutStocks = productService.getAllProductsWithoutStock();
+        model.addAttribute("productsWithoutStock", productsWithoutStocks);
+
+        return "viewStock";
+    }
+
+    @RequestMapping("/stockUpdate/{id}")
+    public String stockUpdateView(@PathVariable(name = "id") String productId, Model model,
+                                  HttpSession session, HttpServletRequest request) {
+
+        session = request.getSession(true);
+        Product currentProduct = productService.findProductById(Long.valueOf(productId));
+
+        if (currentProduct != null) {
+            model.addAttribute("currentProduct", currentProduct);
+        }
+
+        session.setAttribute("productToBeUpdated", currentProduct);
+
+        return "stockUpdate";
+    }
+
+    @RequestMapping("/accept")
+    public String actualizeStockView(Model model, HttpSession session, HttpServletRequest request,  String updateStock){
+
+        session = request.getSession(true);
+
+        if (StringUtils.isNullOrEmpty(updateStock)) {
+            model.addAttribute("emptyFields", "Va rugam completati toate campurile!");
+        }
+
+        Product productToBeUpdated = (Product) session.getAttribute("productToBeUpdated");
+
+        if (!StringUtils.isNullOrEmpty(updateStock) && productToBeUpdated != null) {
+            productToBeUpdated.setStockNumber(Integer.valueOf(updateStock));
+            productService.saveProduct(productToBeUpdated);
+        }
 
         return "adminView";
     }
