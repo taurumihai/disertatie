@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -33,5 +34,18 @@ public class ProductService {
 
             productRepository.save(product);
         }
+    }
+
+    public List<Product> getAllProductsWithoutStock(){
+
+        List<Product> productList = new ArrayList<>();
+
+        for (Product actualProduct : productRepository.findAll()) {
+            if (actualProduct.getStockNumber() == 0) {
+                productList.add(actualProduct);
+            }
+        }
+
+        return productList;
     }
 }

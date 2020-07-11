@@ -7,7 +7,6 @@ import java.util.List;
 @Table(name  = "roles")
 public class Roles {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -20,6 +19,7 @@ public class Roles {
 
     @OneToMany(mappedBy = "roles", fetch = FetchType.LAZY)
     private List<User> userList;
+
 
     public List<User> getUserList() {
         return userList;

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Actualizeaza stoc</title>
+</head>
+<body>
+
+
+    <table>
+        <tr>
+            <td>Nume</td>
+            <td>Descriere</td>
+            <td>Pret</td>
+            <td>Detalii</td>
+            <td>
+                <label for="updateStock">Actualizare stoc</label>
+            </td>
+        </tr>
+        <th:block th:if="currentProduct != null">
+            <tr>
+                <td th:text="${currentProduct.name}">...</td>
+                <td th:text="${currentProduct.description}">...</td>
+                <td th:text="${currentProduct.price}">...</td>
+                <td th:text="${currentProduct.details}">...</td>
+                <form action="#" th:action="@{/accept}" method="post">
+                    <td>
+                        <div class="col-50">
+                            <input type="text" id="updateStock" name="updateStock" placeholder="Actualizare stoc">
+                        </div>
+                    </td>
+                    <td>
+                        <input  type="submit" value="Confirma comanda" class="btn">
+                    </td>
+                </form>
+            </tr>
+        </th:block>
+    </table>
+
+    <div th:if="${emptyFields != null}">
+        <span th:text="${emptyFields}"></span>
+    </div>
+</body>
+</html>
