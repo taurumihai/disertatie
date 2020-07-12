@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmare comanda</title>
+    <link rel="stylesheet" type="text/css" href="../../shoppingCart.css" th:href="@{/shoppingCart.css}">
+</head>
+<body>
+
+
+<div class="row" th:if="${!orderCompletedAlready}">
+    <div class="col-75">
+        <div class="container">
+            <form action="#" th:action="@{/adminView}" method="post">
+
+                <div class="row">
+                    <div class="col-50">
+                        <h3>Comenzi</h3>
+
+                        <div th:if="${currentOrder != null}">
+                            <p>
+                                <span th:text="${currentOrder.name}" class="fa fa-user">...</span>
+                                <span th:text="${currentOrder.billingAddress}" class="fa fa-user">...</span>
+                                <span th:text="${currentOrder.deliveryAddress}" class="fa fa-user">...</span>
+                                <span th:text="${currentOrder.totalOrderPrice}" class="fa fa-user">...</span>
+                                <label> Accepta comanda</label>
+                                <input type="checkbox" name="processCommand"><br>
+                                <input th:href="@{/accept}" type="submit" value="Confirma comanda" class="btn">
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row" th:if="${orderCompletedAlready}">
+    <span class="fa fa-user"> Comanda a fost deja procesata !</span>
+</div>
+
+</body>
+</html>

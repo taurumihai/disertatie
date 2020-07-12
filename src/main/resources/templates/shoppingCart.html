@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cos cumparaturi</title>
+    <link rel="stylesheet" type="text/css" href="../../shoppingCart.css" th:href="@{/shoppingCart.css}">
+</head>
+<body>
+
+<script type="text/javascript" th:src="@{/js/shoppingCartJs.js}"></script>
+
+<div class="row">
+    <div class="col-75">
+        <div class="container">
+            <form action="#" th:action="@{/shoppingCart}" method="post" name = "addressForm">
+
+                <div class="row">
+                    <div class="col-50">
+                        <h3>Billing Address</h3>
+                        <label><i class="fa fa-user"></i> Numele dvs</label>
+                        <input type="text" id="fullName" name="fullName" placeholder="Nume Prenume">
+                        <label><i class="fa fa-envelope"></i> Email</label>
+                        <input type="text" id="email" name="email" placeholder="exemplu@example.com">
+                        <label><i class="fa fa-address-card-o"></i> Adresa Livrare</label>
+                        <input type="text" id="adr" name="deliveryAddress" placeholder="Unirii 12">
+                        <label><i class="fa fa-institution"></i> City</label>
+                        <input type="text" id="city" name="city" placeholder="Targu-Jiu">
+
+                        <div class="row">
+                            <div class="col-50">
+                                <label for="state">Judet</label>
+                                <input type="text" id="state" name="county" placeholder="Judet">
+                            </div>
+                            <div class="col-50">
+                                <label for="zip">Cod postal</label>
+                                <input type="text" id="zip" name="zipCode" placeholder="10001" onkeypress=" validateZipCode(event, this.value, 6) ">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <label>
+                    <input id="sameAddressCheckBox" type="checkbox" name="sameadr" onclick="hideBillingForm()"> Adresa de facturare aceeasi cu cea de livrare
+                </label>
+
+                <div class="row" id="billingAddressForm">
+                    <div class="col-50">
+                        <label><i class="fa fa-address-card-o"></i> Adresa Facturare</label>
+                        <input type="text" id="billingAddress" name="billingAddress" placeholder="542 W. 15th Street">
+                        <label><i class="fa fa-institution"></i> Oras</label>
+                        <input type="text" id="billingCity" name="billingCity" placeholder="Oras">
+
+                        <div class="row">
+                            <div class="col-50">
+                                <label for="state">Judet</label>
+                                <input type="text" id="billingCounty" name="billingCounty" placeholder="Judet">
+                            </div>
+                            <div class="col-50">
+                                <label for="zip">Cod postal</label>
+                                <input type="text" id="billingZipCode" name="billingZipCode" placeholder="123456" onkeypress=" validateZipCode(event, this.value, 6) ">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <input type="submit" value="Continue to checkout" class="btn">
+            </form>
+        </div>
+    </div>
+
+    <div class="col-25">
+        <div class="container">
+            <h4>Cos cumparaturi <span class="price" style="color:black"><i class="fa fa-shopping-cart"></i></span></h4>
+
+            <div th:if="${productList != null}">
+                <div  th:each="product : ${productList}">
+                    <p>
+                        <a th:href="@{productDetails/__${product.id}__}">
+                            <span th:text="${product.name}"></span>
+                            <span th:text="${product.details}">...</span>
+                            <!--<span th:text="${product.description}">...</span>-->
+                            <label>Pret</label>
+                            <span th:text="${product.price}">...</span>
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <hr>
+            <p>Pret total <span class="price" style="color:black"><b><span th:text="${totalPrice}"></span></b></span></p>
+
+            <a href="/welcome" class="btn", style="margin-top:50px, margin-left:30px"> Continua cumparaturile </a>
+        </div>
+    </div>
+
+
+    <div th:if="${deliveryAddressError != null}">
+        <span th:text="${deliveryAddressError}"></span>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Produse digitale</title>
+    <link rel="stylesheet" type="text/css" href="../../table.css" th:href="@{/table.css}">
+    <link rel="stylesheet" type="text/css" href="../../welcomeCSS.css" th:href="@{/welcomeCSS.css}">
+</head>
+<body>
+
+<div class="navbar">
+    <a href="#welcome">Home</a>
+    <a href="#news">News</a>
+    <div class="dropdown">
+        <button class="dropbtn">Categorii
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="/protection">Materiale protectie</a>
+            <a href="/electronics">Electronice</a>
+            <a href="/digitals">Digitale</a>
+        </div>
+    </div>
+</div>
+
+
+<table>
+    <tr>
+        <td>Produs</td>
+        <td>Descriere</td>
+        <td>Pret</td>
+    </tr>
+    <th:block th:each="product : ${allDigitalsProducts}">
+        <tr>
+            <td th:text="${product.name}">...</td>
+            <td th:text="${product.description}">...</td>
+            <td th:text="${product.price}">...</td>
+            <td>
+                <span th:if="${product.stockNumber > 0}">
+                    <a th:href="@{productDetails/__${product.id}__}" class="btn btn-danger">Detalii</a>
+                </span>
+                <span th:unless="${product.stockNumber > 0}">Stoc indisponibil !</span>
+
+            </td>
+        </tr>
+    </th:block>
+</table>
+</body>
+</html>

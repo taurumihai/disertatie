@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vizualizare stoc</title>
+    <link rel="stylesheet" type="text/css" href="../../table.css" th:href="@{/table.css}">
+    <link rel="stylesheet" type="text/css" href="../../welcomeCSS.css" th:href="@{/welcomeCSS.css}">
+</head>
+<body>
+
+<div class="navbar">
+    <a href="/adminView">Acasa</a>
+    <a href="#news">Noutati</a>
+    <div class="dropdown">
+        <button class="dropbtn">Admin view
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="/viewOrders">Vezi comenzi</a>
+            <a href="/addProducts">Adauga produse</a>
+            <a href="/viewStock">Actualizeaza stoc</a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-75">
+        <div class="container">
+            <form action="#" th:action="@{/stockUpdate}" method="post">
+                <h3> Actualizare stoc</h3>
+                <table>
+                    <tr>
+                        <td>Produs</td>
+                        <td>Descriere</td>
+                        <td>Actualizeaza stoc</td>
+                    </tr>
+                    <th:block th:each="product : ${productsWithoutStock}">
+                        <tr>
+                            <td th:text="${product.name}">...</td>
+                            <td th:text="${product.description}">...</td>
+                            <td>
+                                <a th:href="@{stockUpdate/__${product.id}__}">Actualizeaza</a>
+                            </td>
+                        </tr>
+                    </th:block>
+                </table>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>
