@@ -22,6 +22,11 @@ public class ProductsController {
     @Autowired
     private ProductService productService;
 
+    private static final String ALL_PRODUCTS_LIST = "allProductsLits";
+    private static final String CURRENT_PRODUCT = "currentProduct";
+    private static final String PRODUCT_LIST ="productList";
+    private static final String ALL_DIGITAL_PRODUCTS = "allDigitalsProducts";
+
     @RequestMapping("/protection")
     public String protectionMaterialView(Model model, HttpServletRequest request) {
 
@@ -35,7 +40,7 @@ public class ProductsController {
             }
         }
 
-        model.addAttribute("allProductsLits", allProductsLits);
+        model.addAttribute(ALL_PRODUCTS_LIST, allProductsLits);
 
         return "protection";
     }
@@ -45,7 +50,7 @@ public class ProductsController {
                                             Model model, HttpServletResponse response, HttpServletRequest request){
 
 
-        List<Product> productCompleteList = (List<Product>) session.getAttribute("productList");
+        List<Product> productCompleteList = (List<Product>) session.getAttribute(PRODUCT_LIST);
         if (productCompleteList == null) {
             productCompleteList = new ArrayList<>();
         }
@@ -56,10 +61,10 @@ public class ProductsController {
         if (currentProduct != null) {
 
             productCompleteList.add(currentProduct);
-            model.addAttribute("currentProduct", currentProduct);
+            model.addAttribute(CURRENT_PRODUCT, currentProduct);
         }
 
-        session.setAttribute("productList", productCompleteList);
+        session.setAttribute(PRODUCT_LIST, productCompleteList);
 
         return "productDetails";
     }
@@ -93,7 +98,7 @@ public class ProductsController {
             }
         }
 
-        model.addAttribute("allElectronicsProducts", allElectronicsProducts);
+        model.addAttribute(ALL_DIGITAL_PRODUCTS, allElectronicsProducts);
 
         return "electronics";
     }

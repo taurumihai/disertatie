@@ -32,6 +32,13 @@ public class HomeController {
     @Autowired
     private OrderService orderService;
 
+    private static final String EMAIL_ERROR = "emailError";
+    private static final String EXISTING_USER = "existingUser";
+    private static final String LOGGED_USER = "loggedUser";
+    private static final String UNCONFIRMED_ORDERS = "unconfirmedOrders";
+    private static final String NUMBER_OF_ORDERS_CONFIRMED_BY_ADMIN = "numberOfOrdersConfirmedByAdmin";
+    private static final String PASSWORD_ERROR = "passError";
+
     @RequestMapping("/")
     public String viewHome() {
 
@@ -61,7 +68,7 @@ public class HomeController {
 
             } else {
 
-                model.addAttribute("emailError", "Email is already used.");
+                model.addAttribute(EMAIL_ERROR,"Email is already used.");
                 return "register";
             }
             if (!StringUtils.isNullOrEmpty(password)) {
@@ -74,7 +81,7 @@ public class HomeController {
 
         } else {
 
-            model.addAttribute("existingUser", "Username already used. Please chose another one.");
+            model.addAttribute(EXISTING_USER,"Username already used. Please chose another one.");
             return "register";
         }
     }
@@ -84,7 +91,7 @@ public class HomeController {
 
         session = request.getSession(true);
 
-        if ((User) session.getAttribute("loggedUser") != null) {
+        if ((User) session.getAttribute(LOGGED_USER) != null) {
             return "welcome";
         }
 
@@ -118,15 +125,15 @@ public class HomeController {
                     unconfirmedOrders ++;
                 }
             }
-            model.addAttribute("numberOfOrdersConfirmedByAdmin", numberOfOrdersConfirmedByAdmin);
-            model.addAttribute("unconfirmedOrders", unconfirmedOrders);
-            session.setAttribute("loggedUser", checkUser);
+            model.addAttribute(NUMBER_OF_ORDERS_CONFIRMED_BY_ADMIN, numberOfOrdersConfirmedByAdmin);
+            model.addAttribute(UNCONFIRMED_ORDERS, unconfirmedOrders);
+            session.setAttribute(LOGGED_USER, checkUser);
             return "adminView";
         }
 
         if (checkUser != null && checkUser.getRoles() != adminRole) {
 
-            session.setAttribute("loggedUser", checkUser);
+            session.setAttribute(LOGGED_USER, checkUser);
 
             if (password.equals(checkUser.getPassword())) {
 
@@ -134,12 +141,12 @@ public class HomeController {
                     checkUser.setRoles(userRole);
                     userService.saveUser(checkUser);
                 }
-                session.setAttribute("loggedUser", checkUser);
+                session.setAttribute(LOGGED_USER, checkUser);
                 return "welcome";
             } else {
 
-                model.addAttribute("passError", "Incorrect password. Try again.");
-                session.setAttribute("loggedUser", checkUser);
+                model.addAttribute(PASSWORD_ERROR, "Incorrect password. Try again.");
+                session.setAttribute(LOGGED_USER, checkUser);
                 return "login";
             }
         }

@@ -35,6 +35,13 @@ public class ShoppingCartController {
     @Autowired
     private ProductService productService;
 
+    private static final String PRODUCT_LIST = "productList";
+    private static final String TOTAL_PRICE_FOR_PRODUCTS = "totalPrice";
+    private static final String DELIVERY_ADDRESS_ERROR = "deliveryAddressError";
+    private static final String CURRENT_ORDER = "currentOrder";
+    private static final String HIDE_SEND_ORDER = "hideSendOrder";
+    private static final String ORDER_RROCESED = "orderProcesed";
+
     @RequestMapping(value = {"/shoppingCart", "/address", "/completeOrder"})
     public String shoppingCartView( Model model, HttpServletRequest request,
                                     String fullName, String email,
@@ -45,10 +52,10 @@ public class ShoppingCartController {
         HttpSession session;
         Address userAddress = new Address();
         session = request.getSession(true);
-        productList = (List<Product>) session.getAttribute("productList");
+        productList = (List<Product>) session.getAttribute(PRODUCT_LIST);
 
-        session.setAttribute("productList",productList );
-        model.addAttribute("productList", productList);
+        session.setAttribute(PRODUCT_LIST, productList );
+        model.addAttribute(PRODUCT_LIST, productList);
         User loggedUser = (User) session.getAttribute("loggedUser");
         Address checkAddress = new Address();
 
@@ -76,21 +83,21 @@ public class ShoppingCartController {
                 totalPriceForProducts += product.getPrice();
 
             }
-            model.addAttribute("totalPrice", totalPriceForProducts);
+            model.addAttribute(TOTAL_PRICE_FOR_PRODUCTS, totalPriceForProducts);
         }
 
 
         if (StringUtils.isNullOrEmpty(deliveryAddress) || StringUtils.isNullOrEmpty(county) ||
                 StringUtils.isNullOrEmpty(city) || StringUtils.isNullOrEmpty(zipCode) || StringUtils.isNullOrEmpty(email)){
 
-            model.addAttribute("deliveryAddressError", "Completati toate campurile");
+            model.addAttribute(DELIVERY_ADDRESS_ERROR, "Completati toate campurile");
             return "shoppingCart";
 
 
         } else if (sameadr == null && (StringUtils.isNullOrEmpty(billingAddress) ||
                 StringUtils.isNullOrEmpty(billingCounty ) || StringUtils.isNullOrEmpty(billingCity) || StringUtils.isNullOrEmpty(billingZipCode))){
 
-            model.addAttribute("deliveryAddressError", "Completati toate campurile");
+            model.addAttribute(DELIVERY_ADDRESS_ERROR, "Completati toate campurile");
             return "shoppingCart";
 
         } else {
@@ -135,8 +142,8 @@ public class ShoppingCartController {
         order.setName(orderName);
         order.setTotalOrderPrice(totalPriceForProducts);
 
-        session.setAttribute("currentOrder", order);
-        model.addAttribute("hideSendOrder", false);
+        session.setAttribute( CURRENT_ORDER, order);
+        model.addAttribute(HIDE_SEND_ORDER, false);
 
         return "completeOrder";
     }
@@ -151,7 +158,7 @@ public class ShoppingCartController {
 
         Order currentOrder = (Order) session.getAttribute("currentOrder");
 
-        model.addAttribute("productList", productList);
+        model.addAttribute(PRODUCT_LIST, productList);
 
         Double totalPriceForProducts = 0.0;
         if (productList != null) {
@@ -164,14 +171,14 @@ public class ShoppingCartController {
                 }
                 productService.saveProduct(product);
             }
-            model.addAttribute("totalPrice", totalPriceForProducts);
+            model.addAttribute(TOTAL_PRICE_FOR_PRODUCTS, totalPriceForProducts);
         }
 
         orderService.saveOrder(currentOrder);
 
-        model.addAttribute("hideSendOrder", true);
-        model.addAttribute("orderProcesed", "Va multumim pentru comanda !");
-        session.removeAttribute("productList");
+        model.addAttribute(HIDE_SEND_ORDER, true);
+        model.addAttribute(ORDER_RROCESED, "Va multumim pentru comanda !");
+        session.removeAttribute(PRODUCT_LIST);
 
         return "completeOrder";
     }

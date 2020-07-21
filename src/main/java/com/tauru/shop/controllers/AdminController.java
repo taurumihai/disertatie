@@ -27,15 +27,26 @@ public class AdminController {
     @Autowired
     private ProductService productService;
 
+    private static final String UNPROCESSED_ORDERS = "unprocessedOrders";
+    private static final String CURRENT_ORDER = "currentOrder";
+    private static final String COMPLETE_ORDER = "completeOrder";
+    private static final String ORDER_COMPLETED_ALREADY = "orderCompletedAlready";
+    private static final String NUMBER_OF_ORDERS_CONFIRMED_BY_ADMIN = "numberOfOrdersConfirmedByAdmin";
+    private static final String UNCONFIRMED_ORDERS = "unconfirmedOrders";
+    private static final String MISSING_FIELDS = "missingFields";
+    private static final String PRODUCTS_WITHOUT_STOCK = "productsWithoutStock";
+    private static final String CURRENT_PRODUCT = "currentProduct";
+    private static final String PRODUCT_TO_BE_UPDATED = "productToBeUpdated";
+    private static final String EMPTY_FIELDS = "emptyFields";
+
     @RequestMapping(value = {"/viewOrders"})
     public String viewOrdersView(Model model, String processCommand) {
 
         List<Order> unprocessedOrders = orderService.getAllUnprocessedOrders();
 
         if (unprocessedOrders != null) {
-            model.addAttribute("unprocessedOrders", unprocessedOrders);
+            model.addAttribute(UNPROCESSED_ORDERS, unprocessedOrders);
         }
-
 
         return "viewOrders";
     }
@@ -50,7 +61,7 @@ public class AdminController {
         Order currentOrder = orderService.findOrderById(Long.valueOf(orderId));
 
         if (currentOrder != null) {
-            model.addAttribute("currentOrder", currentOrder);
+            model.addAttribute(CURRENT_ORDER, currentOrder);
         }
 
         if (currentOrder != null && processCommand != null && processCommand.equals("on")) {
@@ -59,27 +70,40 @@ public class AdminController {
             orderService.saveOrder(currentOrder);
         }
 
-        session.setAttribute("completeOrder", currentOrder);
-        model.addAttribute("orderCompletedAlready", currentOrder.getOrderIsProcessed());
+        session.setAttribute(COMPLETE_ORDER, currentOrder);
+        model.addAttribute(ORDER_COMPLETED_ALREADY, currentOrder.getOrderIsProcessed());
 
         return "confirmOrder";
     }
 
     @RequestMapping(value = "/adminView")
-    public String welcomeView(HttpServletRequest request, String processCommand, Model model){
+    public String welcomeView(HttpSession session, HttpServletRequest request, String processCommand, Model model, String updateStock){
 
-        HttpSession session = request.getSession(true);
+
+        session = request.getSession(true);
+
+        if (StringUtils.isNullOrEmpty(updateStock)) {
+            model.addAttribute(EMPTY_FIELDS,"Va rugam completati toate campurile!");
+        }
+
+        Product productToBeUpdated = (Product) session.getAttribute(PRODUCT_TO_BE_UPDATED);
+
+        if (!StringUtils.isNullOrEmpty(updateStock) && productToBeUpdated != null) {
+            productToBeUpdated.setStockNumber(Integer.valueOf(updateStock));
+            productService.saveProduct(productToBeUpdated);
+        }
+
         Boolean orderCheckedByAdmin = Boolean.FALSE;
-        Order confirmOrder = (Order) session.getAttribute("completeOrder");
+        Order confirmOrder = (Order) session.getAttribute(COMPLETE_ORDER);
 
         if (processCommand != null && processCommand.equals("on")) {
             orderCheckedByAdmin = Boolean.TRUE;
         }
 
-        model.addAttribute("orderCompletedAlready", Boolean.FALSE);
+        model.addAttribute(ORDER_COMPLETED_ALREADY, Boolean.FALSE);
         if (confirmOrder != null && confirmOrder.getOrderIsProcessed()) {
 
-            model.addAttribute("orderCompletedAlready", Boolean.TRUE);
+            model.addAttribute(ORDER_COMPLETED_ALREADY, Boolean.TRUE);
         }
 
         if (confirmOrder != null &&  orderCheckedByAdmin) {
@@ -98,8 +122,8 @@ public class AdminController {
                 unconfirmedOrders ++;
             }
         }
-        model.addAttribute("numberOfOrdersConfirmedByAdmin", numberOfOrdersConfirmedByAdmin);
-        model.addAttribute("unconfirmedOrders", unconfirmedOrders);
+        model.addAttribute(NUMBER_OF_ORDERS_CONFIRMED_BY_ADMIN, numberOfOrdersConfirmedByAdmin);
+        model.addAttribute(UNCONFIRMED_ORDERS, unconfirmedOrders);
 
         return "adminView";
     }
@@ -112,7 +136,7 @@ public class AdminController {
         if (StringUtils.isNullOrEmpty(productName) || StringUtils.isNullOrEmpty(description) || StringUtils.isNullOrEmpty(details)
                 || StringUtils.isNullOrEmpty(price) || StringUtils.isNullOrEmpty(stock)) {
 
-            model.addAttribute("missingFields", "Completati toate campurile");
+            model.addAttribute(MISSING_FIELDS, "Completati toate campurile");
             return "addProducts";
         }
 
@@ -129,7 +153,7 @@ public class AdminController {
     public String updateStockView(Model model) {
 
         List<Product> productsWithoutStocks = productService.getAllProductsWithoutStock();
-        model.addAttribute("productsWithoutStock", productsWithoutStocks);
+        model.addAttribute(PRODUCTS_WITHOUT_STOCK, productsWithoutStocks);
 
         return "viewStock";
     }
@@ -142,30 +166,11 @@ public class AdminController {
         Product currentProduct = productService.findProductById(Long.valueOf(productId));
 
         if (currentProduct != null) {
-            model.addAttribute("currentProduct", currentProduct);
+            model.addAttribute(CURRENT_PRODUCT, currentProduct);
         }
 
-        session.setAttribute("productToBeUpdated", currentProduct);
+        session.setAttribute(PRODUCT_TO_BE_UPDATED, currentProduct);
 
         return "stockUpdate";
-    }
-
-    @RequestMapping("/accept")
-    public String actualizeStockView(Model model, HttpSession session, HttpServletRequest request,  String updateStock){
-
-        session = request.getSession(true);
-
-        if (StringUtils.isNullOrEmpty(updateStock)) {
-            model.addAttribute("emptyFields", "Va rugam completati toate campurile!");
-        }
-
-        Product productToBeUpdated = (Product) session.getAttribute("productToBeUpdated");
-
-        if (!StringUtils.isNullOrEmpty(updateStock) && productToBeUpdated != null) {
-            productToBeUpdated.setStockNumber(Integer.valueOf(updateStock));
-            productService.saveProduct(productToBeUpdated);
-        }
-
-        return "adminView";
     }
 }
