@@ -159,7 +159,9 @@ public class ShoppingCartController {
             for (Product product : productList) {
                 totalPriceForProducts += product.getPrice();
                 Integer currentStock = product.getStockNumber();
-                product.setStockNumber(currentStock - 1);
+                if (currentStock > 0) {
+                    product.setStockNumber(currentStock - 1);
+                }
                 productService.saveProduct(product);
             }
             model.addAttribute("totalPrice", totalPriceForProducts);
