@@ -39,7 +39,9 @@ public class UserService {
         try {
 
             return userRepository.findUserByUsername(username);
+
         } catch (Exception ex) {
+
             LOGGER.warning("Query should retun unic results. ");
             throw new BullShopError("Error while trying to retrieve username." + ex);
         }

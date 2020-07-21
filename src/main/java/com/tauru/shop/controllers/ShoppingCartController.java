@@ -169,6 +169,7 @@ public class ShoppingCartController {
 
         model.addAttribute("hideSendOrder", true);
         model.addAttribute("orderProcesed", "Va multumim pentru comanda !");
+        session.removeAttribute("productList");
 
         return "completeOrder";
     }
