@@ -127,6 +127,7 @@ public class HomeController {
             }
             model.addAttribute(NUMBER_OF_ORDERS_CONFIRMED_BY_ADMIN, numberOfOrdersConfirmedByAdmin);
             model.addAttribute(UNCONFIRMED_ORDERS, unconfirmedOrders);
+            
             session.setAttribute(LOGGED_USER, checkUser);
             return "adminView";
         }
@@ -143,10 +144,10 @@ public class HomeController {
                 }
                 session.setAttribute(LOGGED_USER, checkUser);
                 return "welcome";
+
             } else {
 
-                model.addAttribute(PASSWORD_ERROR, "Incorrect password. Try again.");
-                session.setAttribute(LOGGED_USER, checkUser);
+                model.addAttribute(PASSWORD_ERROR, "Parola introdusa este incorecta. Incercati din nou!");
                 return "login";
             }
         }
