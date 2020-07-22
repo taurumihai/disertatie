@@ -4,6 +4,7 @@ package com.tauru.shop.services;
 import com.tauru.shop.entities.User;
 import com.tauru.shop.repositories.UserRepository;
 import com.tauru.shop.utilitare.BullShopError;
+import com.tauru.shop.utilitare.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -58,5 +59,16 @@ public class UserService {
         }
 
         return true;
+    }
+
+    public User findUserByPassword(String password) {
+
+        if (!StringUtils.isNullOrEmpty(password)) {
+
+            return userRepository.findUserByPassword(password);
+        }
+
+        LOGGER.warning("No matched user found for password " + password);
+        return null;
     }
 }

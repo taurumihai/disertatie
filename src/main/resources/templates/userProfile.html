@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Contul meu</title>
+    <link rel="stylesheet" type="text/css" href="../../shoppingCart.css" th:href="@{/shoppingCart.css}">
+    <link rel="stylesheet" type="text/css" href="../../welcomeCSS.css" th:href="@{/welcomeCSS.css}">
+</head>
+<body>
+
+<div class="navbar">
+    <a href="/welcome">Acasa</a>
+    <a href="#news">Noutati</a>
+    <div class="dropdown">
+        <button class="dropbtn">Categorii
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+            <a href="/protection">Materiale protectie</a>
+            <a href="/electronics">Electronice</a>
+            <a href="/digitals">Digitale</a>
+        </div>
+    </div>
+    <a href="/userProfile">Contul meu</a>
+</div>
+
+<div class="row">
+    <div class="col-75">
+        <div class="container">
+            <form action="#" th:action="@{/userProfile}" method="post">
+
+                <div class="row">
+                    <div class="col-50">
+                        <h3>Schimbare parola</h3>
+                        <label><i class="fa fa-user"></i> Parola curenta</label>
+                        <input type="password" id="currentPassword" name="currentPassword" placeholder="Parola curenta">
+                        <label><i class="fa fa-envelope"></i> Parola noua</label>
+                        <input type="password" id="newPassword" name="newPassword" placeholder="Parola noua">
+                        <label><i class="fa fa-address-card-o"></i> Confirma parola</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirma parola">
+                    </div>
+                </div>
+                <input type="submit" value="Schimba parola" class="btn">
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:if="${emptyFields != null}">
+    <span th:text="${emptyFields}"></span>
+</div>
+
+<div th:if="${passwordError != null}">
+    <span th:text="${passwordError}"></span>
+</div>
+
+</body>
+</html>
