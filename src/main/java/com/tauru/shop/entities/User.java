@@ -1,6 +1,7 @@
 package com.tauru.shop.entities;
 
 import javax.persistence.*;
+import java.util.Comparator;
 import java.util.List;
 
 @Entity
@@ -95,5 +96,53 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+
+    @Override
+    public boolean equals(Object obj) {
+
+        if(this == obj)
+            return true;
+
+        if(obj == null || obj.getClass()!= this.getClass())
+            return false;
+
+        User user = (User) obj;
+
+        return  user.username.equals(username) &&
+                user.password.equals(password) &&
+                user.email.equals(email) &&
+                user.firstName.equals(firstName) &&
+                user.lastName.equals(lastName);
+    }
+
+    @Override
+    public int hashCode() {
+
+        int result = 17;
+        result = 11 * result + username.hashCode();
+        result = 11 * result + password.hashCode();
+        result = 11 * result + email.hashCode();
+        result = 11 * result + firstName.hashCode();
+        result = 11 * result + lastName.hashCode();
+
+        return result;
+    }
+
+    public static class UserSortingComparator implements Comparator<User> {
+
+        @Override
+        public int compare(User firstUser, User secondUser) {
+
+            int usernameComparator = firstUser.getUsername().compareTo(secondUser.getUsername());
+            int emailComparator = firstUser.getEmail().compareTo(secondUser.getEmail());
+
+            if (usernameComparator == 0) {
+                return ((emailComparator == 0) ? usernameComparator : emailComparator);
+            } else {
+                return emailComparator;
+            }
+        }
     }
 }
