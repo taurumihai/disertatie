@@ -2,6 +2,10 @@ package com.tauru.shop.services;
 
 import com.tauru.shop.entities.Product;
 import com.tauru.shop.repositories.ProductRepository;
+import com.tauru.shop.utilitare.BullShopError;
+import com.tauru.shop.utilitare.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +17,7 @@ import java.util.List;
 @Transactional
 public class ProductService {
 
+    Logger LOGGER = LoggerFactory.getLogger(ProductService.class);
 
     @Autowired
     private ProductRepository productRepository;
@@ -47,5 +52,26 @@ public class ProductService {
         }
 
         return productList;
+    }
+
+    public boolean checkStockForCurrentProductById(Long productId, Integer numberOfSameProductInCart) throws BullShopError {
+
+        if (!StringUtils.isNullOrEmpty(String.valueOf(productId))) {
+
+            Product currentProduct = productRepository.findProductById(productId);
+            if (currentProduct != null && currentProduct.getStockNumber() - numberOfSameProductInCart > 0) {
+
+                return true;
+            } else {
+
+                LOGGER.error("Not enought stock for this product !");
+                return false;
+            }
+
+        } else {
+
+            LOGGER.error("No such product !");
+            throw new BullShopError("Invalid productId while checking for stock! ProductId null or empty, productId = " + productId);
+        }
     }
 }

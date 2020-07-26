@@ -45,6 +45,7 @@ public class ProductsController {
         return "protection";
     }
 
+    @SuppressWarnings("unchecked")
     @RequestMapping(value = "/productDetails/{id}")
     public String getViewProductDetailsView(@PathVariable(name = "id") String productId, HttpSession session,
                                             Model model, HttpServletResponse response, HttpServletRequest request){

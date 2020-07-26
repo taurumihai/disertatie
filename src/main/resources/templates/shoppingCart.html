@@ -71,6 +71,14 @@
         <div class="container">
             <h4>Cos cumparaturi <span class="price" style="color:black"><i class="fa fa-shopping-cart"></i></span></h4>
 
+            <div th:if="${emptyCart != null}">
+                <span th:text="${emptyCart}"></span>
+            </div>
+
+            <div th:if="${insufficentStock != null}">
+                <span th:text="${insufficentStock}"></span>
+            </div>
+
             <div th:if="${productList != null}">
                 <div  th:each="product : ${productList}">
                     <p>
@@ -78,9 +86,13 @@
                             <span th:text="${product.name}"></span>
                             <span th:text="${product.details}">...</span>
                             <!--<span th:text="${product.description}">...</span>-->
-                            <label>Pret</label>
-                            <span th:text="${product.price}">...</span>
-                        </a>
+                        </a><br>
+                        <span>Pret</span>
+                        <span th:text="${product.price}">...</span>
+
+                        <form action="#" th:action="@{productDetails/__${product.id}__}" method="post">
+                            <button name="action" value="remove"> - </button> <span> Numar produse</span> <button name="action" value="add"> + </button>
+                        </form>
                     </p>
                 </div>
             </div>

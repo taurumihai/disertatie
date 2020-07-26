@@ -5,18 +5,22 @@ import com.tauru.shop.entities.*;
 import com.tauru.shop.services.*;
 import com.tauru.shop.utilitare.BullShopError;
 import com.tauru.shop.utilitare.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Controller
 public class ShoppingCartController {
+
+    Logger LOGGER = LoggerFactory.getLogger(ShoppingCartController.class);
 
     private List<Product> productList;
 
@@ -41,7 +45,10 @@ public class ShoppingCartController {
     private static final String CURRENT_ORDER = "currentOrder";
     private static final String HIDE_SEND_ORDER = "hideSendOrder";
     private static final String ORDER_RROCESED = "orderProcesed";
+    private static final String EMPTY_CART = "emptyCart";
+    private static final String INSUFFICIENT_STOCK  = "insufficentStock";
 
+    @SuppressWarnings("unchecked")
     @RequestMapping(value = {"/shoppingCart", "/address", "/completeOrder"})
     public String shoppingCartView( Model model, HttpServletRequest request,
                                     String fullName, String email,
@@ -53,6 +60,25 @@ public class ShoppingCartController {
         Address userAddress = new Address();
         session = request.getSession(true);
         productList = (List<Product>) session.getAttribute(PRODUCT_LIST);
+
+        // Sortare produse in cos dupa Numele produsului, apoi dupa pret
+        Collections.sort(productList, new Product.ProductSortingComparator());
+
+        /*
+        * Mesaje de eroare care pot aparea cand stergi/adaugi produse in cos din cart
+        * view-urile respective nu au asociate niciun template si nu pot afisa mesaje de eroare decat daca le pun pe sesiune
+        * mesajele de eroare sunt puse pe sesiune si aruncate de controller in browser
+        *
+        * */
+        if ((session.getAttribute(PRODUCT_LIST)) != null && ((List<Product>) session.getAttribute(PRODUCT_LIST)).isEmpty()) {
+
+            model.addAttribute(EMPTY_CART, "Nu aveti niciun produs in cos!");
+        }
+
+        if ((session.getAttribute(INSUFFICIENT_STOCK)) != null) {
+
+            model.addAttribute(INSUFFICIENT_STOCK, session.getAttribute(INSUFFICIENT_STOCK));
+        }
 
         session.setAttribute(PRODUCT_LIST, productList );
         model.addAttribute(PRODUCT_LIST, productList);
@@ -148,15 +174,15 @@ public class ShoppingCartController {
         return "completeOrder";
     }
 
+    @SuppressWarnings("unchecked")
     @RequestMapping("/finalizeOrder")
     public String finalizeOrderView(Model model, HttpServletRequest request) {
 
 
         HttpSession session;
         session = request.getSession(true);
-        productList = (List<Product>) session.getAttribute("productList");
-
-        Order currentOrder = (Order) session.getAttribute("currentOrder");
+        productList = (List<Product>) session.getAttribute(PRODUCT_LIST);
+        Order currentOrder = (Order) session.getAttribute(CURRENT_ORDER);
 
         model.addAttribute(PRODUCT_LIST, productList);
 
@@ -184,4 +210,69 @@ public class ShoppingCartController {
     }
 
 
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/productDetails/{id}", params = "action=remove")
+    public String removeProductView(@PathVariable(name = "id") String productId, HttpServletRequest request){
+
+        HttpSession session = request.getSession(true);
+
+        Product currentProduct = productService.findProductById(Long.parseLong(productId));
+        productList = (List<Product>) session.getAttribute(PRODUCT_LIST);
+
+        List<Product> duplicateElements = findAllDuplicateProducts(productList, currentProduct);
+        productList.removeAll(duplicateElements);
+        duplicateElements.remove(0);
+        productList.addAll(duplicateElements);
+
+        session.setAttribute(PRODUCT_LIST, productList);
+
+        return "redirect:/shoppingCart";
+    }
+
+    @SuppressWarnings("unchecked") /*Pentru obiecete pe care le iau de pe sessiune, sa nu ma mai anunte ca nu au fost verificate !!!!!!! se utilizeaza doar daca sunt sigur ca de pe sesiune o sa am mereu o lista de obiecte !!!!!!!!!!!!!!!!!!*/
+    @RequestMapping(value = "/productDetails/{id}", params = "action=add")
+    public String addProductView(@PathVariable(name = "id") String productId, HttpServletRequest request, Model model) throws BullShopError {
+
+        HttpSession session = request.getSession(true);
+        Product currentProduct = productService.findProductById(Long.parseLong(productId));
+        productList = (List<Product>) session.getAttribute(PRODUCT_LIST);
+
+        int numberOfSameProductInCart = 0;
+        for (Product product : productList) {
+            if (product.getId().equals(currentProduct.getId())) {
+                numberOfSameProductInCart ++;
+            }
+        }
+
+        if (currentProduct != null) {
+
+            boolean checkProductByIdAndStock = productService.checkStockForCurrentProductById(currentProduct.getId(), numberOfSameProductInCart);
+
+            if (checkProductByIdAndStock) {
+                productList.add(currentProduct);
+
+            } else {
+
+                // pun pe sesiune erorile, le iau din controller, unde mai fac o verificare, apoi le arunc in template
+                session.setAttribute(INSUFFICIENT_STOCK,"Nu exista suficient stoc pentru comandarea a mai mult de " + numberOfSameProductInCart + " produse " + currentProduct.getName());
+            }
+        }
+
+        session.setAttribute(PRODUCT_LIST, productList);
+
+        return "redirect:/shoppingCart";
+    }
+
+    private List<Product> findAllDuplicateProducts(List<Product> productList, Product duplicateProduct) {
+
+        List<Product> duplicateProductList = new ArrayList<>();
+
+        for (Product product : productList) {
+            if (product.equals(duplicateProduct)) {
+                duplicateProductList.add(duplicateProduct);
+            }
+        }
+
+        return duplicateProductList;
+    }
 }
