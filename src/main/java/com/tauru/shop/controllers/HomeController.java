@@ -9,6 +9,7 @@ import com.tauru.shop.services.RolesService;
 import com.tauru.shop.services.UserService;
 import com.tauru.shop.utilitare.BullShopError;
 import com.tauru.shop.utilitare.StringUtils;
+import com.tauru.shop.utilitare.UserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -50,9 +51,8 @@ public class HomeController {
 
         User user = new User();
         boolean checkEmail = userService.checkEmailAvailability(email);
+
         if (StringUtils.isNullOrEmpty(username) || StringUtils.isNullOrEmpty(password) || StringUtils.isNullOrEmpty(email)) {
-            // eroarea aici si nu in if pt ca la prima accesare apare mesajul. Vreau sa apara cand nu completeaza vreun camp
-            // model.addAttribute("registerError", "Va rugam completati toate campurile.");
 
             return "register";
         }
@@ -90,23 +90,26 @@ public class HomeController {
     public String loginView(String username, String password, Model model, HttpSession session, HttpServletRequest request) throws BullShopError {
 
         session = request.getSession(true);
+        Roles adminRole = rolesService.findRoleById((long) 1);
+        Roles userRole = rolesService.findRoleById((long) 2);
 
         if ((User) session.getAttribute(LOGGED_USER) != null) {
             return "welcome";
         }
 
         User checkUser = userService.findUserByUsername(username);
+        if (checkUser != null && checkUser.getRoles() == null) {
 
-
-        if (StringUtils.isNullOrEmpty(username) || StringUtils.isNullOrEmpty(password)) {
-            // eroarea aici si nu in if pt ca la prima accesare apare mesajul. Vreau sa apara cand nu completeaza vreun camp
-            // model.addAttribute("registerError", "Va rugam completati toate campurile.");
-
-            return "login";
+            if (UserUtil.isAdminUser(checkUser)) {
+                checkUser.setRoles(adminRole);
+            } else {
+                checkUser.setRoles(userRole);
+            }
         }
 
-        Roles adminRole = rolesService.findRoleById((long) 1);
-        Roles userRole = rolesService.findRoleById((long) 2);
+        if (StringUtils.isNullOrEmpty(username) || StringUtils.isNullOrEmpty(password)) {
+            return "login";
+        }
 
         if (username.equals("Admin123!@#") && password.equals("TauruMihai95")) {
 
@@ -132,16 +135,11 @@ public class HomeController {
             return "adminView";
         }
 
-        if (checkUser != null && checkUser.getRoles() != adminRole) {
+        if (checkUser != null && checkUser.getRoles().equals(userRole)) {
 
             session.setAttribute(LOGGED_USER, checkUser);
 
             if (password.equals(checkUser.getPassword())) {
-
-                if (checkUser.getRoles() == null) {
-                    checkUser.setRoles(userRole);
-                    userService.saveUser(checkUser);
-                }
                 session.setAttribute(LOGGED_USER, checkUser);
                 return "welcome";
 

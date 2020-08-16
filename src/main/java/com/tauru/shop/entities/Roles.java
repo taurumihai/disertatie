@@ -1,8 +1,6 @@
 package com.tauru.shop.entities;
 
 import javax.persistence.*;
-import java.util.List;
-
 @Entity
 @Table(name  = "roles")
 public class Roles {
@@ -16,18 +14,6 @@ public class Roles {
 
     @Column(name = "description")
     private String description;
-
-    @OneToMany(mappedBy = "roles", fetch = FetchType.LAZY)
-    private List<User> userList;
-
-
-    public List<User> getUserList() {
-        return userList;
-    }
-
-    public void setUserList(List<User> userList) {
-        this.userList = userList;
-    }
 
     public Long getId() {
         return id;

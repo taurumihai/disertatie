@@ -25,7 +25,7 @@ public class ProductsController {
     private static final String ALL_PRODUCTS_LIST = "allProductsLits";
     private static final String CURRENT_PRODUCT = "currentProduct";
     private static final String PRODUCT_LIST ="productList";
-    private static final String ALL_DIGITAL_PRODUCTS = "allDigitalsProducts";
+    private static final String ALL_ELECTRONICSL_PRODUCTS = "allElectronicsProducts";
 
     @RequestMapping("/protection")
     public String protectionMaterialView(Model model, HttpServletRequest request) {
@@ -99,7 +99,7 @@ public class ProductsController {
             }
         }
 
-        model.addAttribute(ALL_DIGITAL_PRODUCTS, allElectronicsProducts);
+        model.addAttribute(ALL_ELECTRONICSL_PRODUCTS, allElectronicsProducts);
 
         return "electronics";
     }
