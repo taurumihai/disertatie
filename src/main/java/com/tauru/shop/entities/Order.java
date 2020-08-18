@@ -1,6 +1,7 @@
 package com.tauru.shop.entities;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -10,8 +11,8 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "order_number")
+    private String orderNumber;
 
     @Column(name =  "total_price")
     private Double totalOrderPrice;
@@ -34,6 +35,22 @@ public class Order {
     @Column(name = "billing_address")
     private String billingAddress;
 
+    @ManyToMany(cascade = {
+                        CascadeType.PERSIST,
+                        CascadeType.DETACH,
+                        CascadeType.REFRESH,
+                        CascadeType.REMOVE}, fetch = FetchType.EAGER)
+    @JoinTable(name = "order_products", joinColumns = {@JoinColumn(name = "order_id")}, inverseJoinColumns = {@JoinColumn(name = "product_id")})
+    List<Product> productList;
+
+    public List<Product> getProductList() {
+        return productList;
+    }
+
+    public void setProductList(List<Product> productList) {
+        this.productList = productList;
+    }
+
     public String getBillingAddress() {
         return billingAddress;
     }
@@ -50,12 +67,12 @@ public class Order {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getOrderNumber() {
+        return orderNumber;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setOrderNumber(String orderNumber) {
+        this.orderNumber = orderNumber;
     }
 
     public Double getTotalOrderPrice() {

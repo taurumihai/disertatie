@@ -4,6 +4,7 @@ package com.tauru.shop.entities;
 import com.tauru.shop.enums.ProductCategoryEnum;
 import javax.persistence.*;
 import java.util.Comparator;
+import java.util.List;
 
 @Table(name = "products")
 @Entity
@@ -31,6 +32,23 @@ public class Product {
 
     @Column(name = "stock")
     private Integer stockNumber;
+
+    @ManyToMany(mappedBy = "productList",
+            cascade = {
+                        CascadeType.PERSIST,
+                        CascadeType.DETACH,
+                        CascadeType.REFRESH,
+                        CascadeType.REMOVE},
+            fetch = FetchType.EAGER)
+    private List<Order> order;
+
+    public List<Order> getOrder() {
+        return order;
+    }
+
+    public void setOrder(List<Order> order) {
+        this.order = order;
+    }
 
     public Integer getStockNumber() {
         return stockNumber;

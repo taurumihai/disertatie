@@ -2,6 +2,7 @@ package com.tauru.shop.services;
 
 
 import com.tauru.shop.entities.Order;
+import com.tauru.shop.entities.Product;
 import com.tauru.shop.repositories.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.transaction.Transactional;
 import java.util.*;
 
 @Controller
@@ -47,6 +48,8 @@ public class ShoppingCartController {
     private static final String ORDER_RROCESED = "orderProcesed";
     private static final String EMPTY_CART = "emptyCart";
     private static final String INSUFFICIENT_STOCK  = "insufficentStock";
+    private static final String TOTAL_NUMBER_OF_PRODUCTS = "totalNumberOfProducts";
+    private Integer totalNumberOfProducts = 1;
 
     @SuppressWarnings("unchecked")
     @RequestMapping(value = {"/shoppingCart", "/address", "/completeOrder"})
@@ -89,30 +92,6 @@ public class ShoppingCartController {
             checkAddress = addressService.findAddressByUserId(loggedUser.getId());
         }
 
-        if (loggedUser != null) {
-
-            if (StringUtils.isNullOrEmpty(loggedUser.getLastName()) && StringUtils.isNullOrEmpty(loggedUser.getFirstName())){
-
-                if (fullName != null) {
-                    String [] userNameSplitted = fullName.split(" ");
-                    loggedUser.setFirstName(userNameSplitted[0]);
-                    loggedUser.setLastName(userNameSplitted[1]);
-                    userService.saveUser(loggedUser);
-                }
-            }
-        }
-
-        Double totalPriceForProducts = 0.0;
-        if (productList != null) {
-
-            for (Product product : productList) {
-                totalPriceForProducts += product.getPrice();
-
-            }
-            model.addAttribute(TOTAL_PRICE_FOR_PRODUCTS, totalPriceForProducts);
-        }
-
-
         if (StringUtils.isNullOrEmpty(deliveryAddress) || StringUtils.isNullOrEmpty(county) ||
                 StringUtils.isNullOrEmpty(city) || StringUtils.isNullOrEmpty(zipCode) || StringUtils.isNullOrEmpty(email)){
 
@@ -140,10 +119,30 @@ public class ShoppingCartController {
             }
         }
 
+        ShoppingCart shoppingCart = new ShoppingCart(productList);
+
+        Double totalPriceForProducts = 0.0;
+        if (shoppingCart.getProductList() != null) {
+
+            for (Product product : shoppingCart.getProductList()) {
+                totalPriceForProducts += product.getPrice();
+
+            }
+            model.addAttribute(TOTAL_PRICE_FOR_PRODUCTS, totalPriceForProducts);
+        }
+
+        String firstName = "";
+        String lastName = "";
+        if (!StringUtils.isNullOrEmpty(fullName)) {
+            String userName [] = fullName.split(" ");
+            firstName = userName[0];
+            lastName = userName[1];
+        }
+
         Order order = new Order();
         order.setEmail(email);
-        order.setFirstName(loggedUser.getFirstName());
-        order.setLastName(loggedUser.getLastName());
+        order.setFirstName(firstName);
+        order.setLastName(lastName);
 
         //construiesc adresa userului din street + zipcode + city + county
         String delAddress = deliveryAddress + " " + zipCode + " " + city + " " + county;
@@ -159,13 +158,6 @@ public class ShoppingCartController {
             order.setBillingAddress(delAddress);
         }
         order.setOrderIsProcessed(Boolean.FALSE);
-
-        String orderName = "";
-        for (Product product : productList) {
-            orderName += product.getName() + " ";
-        }
-
-        order.setName(orderName);
         order.setTotalOrderPrice(totalPriceForProducts);
 
         session.setAttribute( CURRENT_ORDER, order);
@@ -176,6 +168,7 @@ public class ShoppingCartController {
 
     @SuppressWarnings("unchecked")
     @RequestMapping("/finalizeOrder")
+    @Transactional
     public String finalizeOrderView(Model model, HttpServletRequest request) {
 
 
@@ -199,6 +192,10 @@ public class ShoppingCartController {
             }
             model.addAttribute(TOTAL_PRICE_FOR_PRODUCTS, totalPriceForProducts);
         }
+
+        orderService.saveOrder(currentOrder);
+        currentOrder.setOrderNumber(String.valueOf(currentOrder.getId()));
+        currentOrder.setProductList(productList);
 
         orderService.saveOrder(currentOrder);
 
@@ -239,7 +236,7 @@ public class ShoppingCartController {
 
         int numberOfSameProductInCart = 0;
         for (Product product : productList) {
-            if (product.getId().equals(currentProduct.getId())) {
+            if (currentProduct != null && product.getId().equals(currentProduct.getId())) {
                 numberOfSameProductInCart ++;
             }
         }
@@ -270,6 +267,7 @@ public class ShoppingCartController {
         for (Product product : productList) {
             if (product.equals(duplicateProduct)) {
                 duplicateProductList.add(duplicateProduct);
+                totalNumberOfProducts ++;
             }
         }
 
