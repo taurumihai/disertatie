@@ -19,7 +19,7 @@
 
                         <div th:if="${currentOrder != null}">
                             <p>
-                                <span th:text="${currentOrder.name}" class="fa fa-user">...</span>
+                                <span th:text="${currentOrder.orderNumber}" class="fa fa-user">...</span>
                                 <span th:text="${currentOrder.billingAddress}" class="fa fa-user">...</span>
                                 <span th:text="${currentOrder.deliveryAddress}" class="fa fa-user">...</span>
                                 <span th:text="${currentOrder.totalOrderPrice}" class="fa fa-user">...</span>

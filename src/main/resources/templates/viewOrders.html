@@ -35,7 +35,7 @@
                         <div th:if="${unprocessedOrders != null}">
                             <div  th:each="order : ${unprocessedOrders}">
                                 <br>
-                                    <span th:text="${order.name}" class="fa fa-user">...</span>
+                                    <span th:text="${order.orderNumber}" class="fa fa-user">...</span>
                                     <span th:text="${order.deliveryAddress}" class="fa fa-user">...</span>
                                     <span th:text="${order.billingAddress}" class="fa fa-user">...</span>
                                     <span th:text="${order.totalOrderPrice}" class="fa fa-user">...</span>

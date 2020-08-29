@@ -74,4 +74,24 @@ public class ProductService {
             throw new BullShopError("Invalid productId while checking for stock! ProductId null or empty, productId = " + productId);
         }
     }
+
+    @Transactional
+    public void checkAndActualizeStockForProductsInFinalizeOrder(Long productId) throws BullShopError {
+
+        if (!StringUtils.isNullOrEmpty(String.valueOf(productId))) {
+
+            Product currentProduct = productRepository.findProductById(productId);
+            if (currentProduct != null && currentProduct.getStockNumber() - 1 >= 0) {
+                currentProduct.setStockNumber(currentProduct.getStockNumber() - 1);
+                productRepository.save(currentProduct);
+            } else {
+
+                LOGGER.error("Not enought stock for this product !");
+                throw new BullShopError("Not enought stock for this product with productId = " + productId);
+            }
+        } else {
+            LOGGER.error("No such product !");
+            throw new BullShopError("Invalid productId while checking for stock! ProductId null or empty, productId = " + productId);
+        }
+    }
 }

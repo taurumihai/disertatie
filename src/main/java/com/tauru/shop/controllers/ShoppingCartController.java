@@ -21,8 +21,6 @@ import java.util.*;
 @Controller
 public class ShoppingCartController {
 
-    Logger LOGGER = LoggerFactory.getLogger(ShoppingCartController.class);
-
     private List<Product> productList;
 
     @Autowired
@@ -40,6 +38,8 @@ public class ShoppingCartController {
     @Autowired
     private ProductService productService;
 
+    private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(ShoppingCartController.class.getName());
+
     private static final String PRODUCT_LIST = "productList";
     private static final String TOTAL_PRICE_FOR_PRODUCTS = "totalPrice";
     private static final String DELIVERY_ADDRESS_ERROR = "deliveryAddressError";
@@ -49,30 +49,22 @@ public class ShoppingCartController {
     private static final String EMPTY_CART = "emptyCart";
     private static final String INSUFFICIENT_STOCK  = "insufficentStock";
     private static final String TOTAL_NUMBER_OF_PRODUCTS = "totalNumberOfProducts";
-    private Integer totalNumberOfProducts = 1;
+    private static final String SHOPPING_CART_ITEMS = "shoppingCartItems";
 
     @SuppressWarnings("unchecked")
-    @RequestMapping(value = {"/shoppingCart", "/address", "/completeOrder"})
-    public String shoppingCartView( Model model, HttpServletRequest request,
-                                    String fullName, String email,
-                                    String deliveryAddress, String county,
-                                    String city, String zipCode, String sameadr,
-                                    String billingAddress, String billingCity, String billingCounty, String billingZipCode ) throws BullShopError {
+    @RequestMapping("/shoppingCart")
+    public String shoppingCartView(Model model, HttpServletRequest request) throws BullShopError {
 
         HttpSession session;
-        Address userAddress = new Address();
         session = request.getSession(true);
-        productList = (List<Product>) session.getAttribute(PRODUCT_LIST);
-
-        // Sortare produse in cos dupa Numele produsului, apoi dupa pret
-        Collections.sort(productList, new Product.ProductSortingComparator());
+        ShoppingCart shoppingCart= new ShoppingCart();
 
         /*
-        * Mesaje de eroare care pot aparea cand stergi/adaugi produse in cos din cart
-        * view-urile respective nu au asociate niciun template si nu pot afisa mesaje de eroare decat daca le pun pe sesiune
-        * mesajele de eroare sunt puse pe sesiune si aruncate de controller in browser
-        *
-        * */
+         * Mesaje de eroare care pot aparea cand stergi/adaugi produse in cos din cart
+         * view-urile respective nu au asociate niciun template si nu pot afisa mesaje de eroare decat daca le pun pe sesiune
+         * mesajele de eroare sunt puse pe sesiune si aruncate de controller in browser
+         *
+         * */
         if ((session.getAttribute(PRODUCT_LIST)) != null && ((List<Product>) session.getAttribute(PRODUCT_LIST)).isEmpty()) {
 
             model.addAttribute(EMPTY_CART, "Nu aveti niciun produs in cos!");
@@ -83,7 +75,44 @@ public class ShoppingCartController {
             model.addAttribute(INSUFFICIENT_STOCK, session.getAttribute(INSUFFICIENT_STOCK));
         }
 
-        session.setAttribute(PRODUCT_LIST, productList );
+        productList = (List<Product>) session.getAttribute(PRODUCT_LIST);
+
+        if ((session.getAttribute(SHOPPING_CART_ITEMS) != null)) {
+            productList = (List<Product>) session.getAttribute(SHOPPING_CART_ITEMS);
+        }
+
+        shoppingCart.setProductList(productList);
+
+        Double totalPriceForProducts = 0.0;
+        if (shoppingCart.getProductList() != null) {
+
+            for (Product product : shoppingCart.getProductList()) {
+                totalPriceForProducts += product.getPrice();
+
+            }
+            model.addAttribute(TOTAL_PRICE_FOR_PRODUCTS, totalPriceForProducts);
+        }
+
+        model.addAttribute(PRODUCT_LIST, shoppingCart.getProductList());
+
+        return "shoppingCart";
+    }
+
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = {"/completeOrder"})
+    public String formAddressView(Model model, HttpServletRequest request,
+                                  String fullName, String email,
+                                  String deliveryAddress, String county,
+                                  String city, String zipCode, String sameadr,
+                                  String billingAddress, String billingCity, String billingCounty, String billingZipCode ) throws BullShopError {
+
+        HttpSession session;
+        Address userAddress = new Address();
+        session = request.getSession(true);
+        productList = (List<Product>) session.getAttribute(PRODUCT_LIST);
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setProductList(productList);
+
         model.addAttribute(PRODUCT_LIST, productList);
         User loggedUser = (User) session.getAttribute("loggedUser");
         Address checkAddress = new Address();
@@ -114,21 +143,9 @@ public class ShoppingCartController {
                 userAddress.setZipCode(Integer.valueOf(zipCode));
                 userAddress.setUser(loggedUser);
                 addressService.saveAddress(userAddress);
-                loggedUser.setAddressList(Arrays.asList(userAddress));
+                loggedUser.setAddressList( Collections.singletonList(userAddress));
                 userService.saveUser(loggedUser);
             }
-        }
-
-        ShoppingCart shoppingCart = new ShoppingCart(productList);
-
-        Double totalPriceForProducts = 0.0;
-        if (shoppingCart.getProductList() != null) {
-
-            for (Product product : shoppingCart.getProductList()) {
-                totalPriceForProducts += product.getPrice();
-
-            }
-            model.addAttribute(TOTAL_PRICE_FOR_PRODUCTS, totalPriceForProducts);
         }
 
         String firstName = "";
@@ -158,7 +175,6 @@ public class ShoppingCartController {
             order.setBillingAddress(delAddress);
         }
         order.setOrderIsProcessed(Boolean.FALSE);
-        order.setTotalOrderPrice(totalPriceForProducts);
 
         session.setAttribute( CURRENT_ORDER, order);
         model.addAttribute(HIDE_SEND_ORDER, false);
@@ -169,12 +185,12 @@ public class ShoppingCartController {
     @SuppressWarnings("unchecked")
     @RequestMapping("/finalizeOrder")
     @Transactional
-    public String finalizeOrderView(Model model, HttpServletRequest request) {
+    public String finalizeOrderView(Model model, HttpServletRequest request) throws BullShopError {
 
 
         HttpSession session;
         session = request.getSession(true);
-        productList = (List<Product>) session.getAttribute(PRODUCT_LIST);
+        productList = (List<Product>) session.getAttribute(SHOPPING_CART_ITEMS);
         Order currentOrder = (Order) session.getAttribute(CURRENT_ORDER);
 
         model.addAttribute(PRODUCT_LIST, productList);
@@ -183,13 +199,10 @@ public class ShoppingCartController {
         if (productList != null) {
 
             for (Product product : productList) {
+                productService.checkAndActualizeStockForProductsInFinalizeOrder(product.getId());
                 totalPriceForProducts += product.getPrice();
-                Integer currentStock = product.getStockNumber();
-                if (currentStock > 0) {
-                    product.setStockNumber(currentStock - 1);
-                }
-                productService.saveProduct(product);
             }
+            currentOrder.setTotalOrderPrice(totalPriceForProducts);
             model.addAttribute(TOTAL_PRICE_FOR_PRODUCTS, totalPriceForProducts);
         }
 
@@ -209,30 +222,36 @@ public class ShoppingCartController {
 
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/productDetails/{id}", params = "action=remove")
-    public String removeProductView(@PathVariable(name = "id") String productId, HttpServletRequest request){
+    public String removeProductView(@PathVariable(name = "id") String productId, HttpServletRequest request) throws BullShopError {
 
         HttpSession session = request.getSession(true);
 
         Product currentProduct = productService.findProductById(Long.parseLong(productId));
-        productList = (List<Product>) session.getAttribute(PRODUCT_LIST);
+        List<Product> shoppingCartList = (List<Product>) session.getAttribute(SHOPPING_CART_ITEMS);
+        List<Product> duplicateElements = findAllDuplicateProducts(shoppingCartList, currentProduct);
 
-        List<Product> duplicateElements = findAllDuplicateProducts(productList, currentProduct);
-        productList.removeAll(duplicateElements);
-        duplicateElements.remove(0);
-        productList.addAll(duplicateElements);
+        if (duplicateElements != null) {
+            shoppingCartList.removeAll(duplicateElements);
+            duplicateElements.remove(0);
+            shoppingCartList.addAll(duplicateElements);
+        } else {
 
-        session.setAttribute(PRODUCT_LIST, productList);
+            throw new BullShopError("System error. Trying to delete products from a null list.");
+        }
+        session.setAttribute(SHOPPING_CART_ITEMS, shoppingCartList);
 
         return "redirect:/shoppingCart";
     }
 
-    @SuppressWarnings("unchecked") /*Pentru obiecete pe care le iau de pe sessiune, sa nu ma mai anunte ca nu au fost verificate !!!!!!! se utilizeaza doar daca sunt sigur ca de pe sesiune o sa am mereu o lista de obiecte !!!!!!!!!!!!!!!!!!*/
+    @SuppressWarnings("unchecked")
     @RequestMapping(value = "/productDetails/{id}", params = "action=add")
     public String addProductView(@PathVariable(name = "id") String productId, HttpServletRequest request, Model model) throws BullShopError {
 
         HttpSession session = request.getSession(true);
         Product currentProduct = productService.findProductById(Long.parseLong(productId));
         productList = (List<Product>) session.getAttribute(PRODUCT_LIST);
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setProductList(productList);
 
         int numberOfSameProductInCart = 0;
         for (Product product : productList) {
@@ -246,22 +265,23 @@ public class ShoppingCartController {
             boolean checkProductByIdAndStock = productService.checkStockForCurrentProductById(currentProduct.getId(), numberOfSameProductInCart);
 
             if (checkProductByIdAndStock) {
-                productList.add(currentProduct);
+                shoppingCart.getProductList().add(currentProduct);
 
             } else {
-
                 // pun pe sesiune erorile, le iau din controller, unde mai fac o verificare, apoi le arunc in template
                 session.setAttribute(INSUFFICIENT_STOCK,"Nu exista suficient stoc pentru comandarea a mai mult de " + numberOfSameProductInCart + " produse " + currentProduct.getName());
             }
         }
 
-        session.setAttribute(PRODUCT_LIST, productList);
+        session.setAttribute(SHOPPING_CART_ITEMS, shoppingCart.getProductList());
+        session.setAttribute(TOTAL_NUMBER_OF_PRODUCTS, numberOfSameProductInCart);
 
         return "redirect:/shoppingCart";
     }
 
     private List<Product> findAllDuplicateProducts(List<Product> productList, Product duplicateProduct) {
 
+        int totalNumberOfProducts = 1;
         List<Product> duplicateProductList = new ArrayList<>();
 
         for (Product product : productList) {
