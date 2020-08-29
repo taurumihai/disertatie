@@ -227,16 +227,30 @@ public class ShoppingCartController {
         HttpSession session = request.getSession(true);
 
         Product currentProduct = productService.findProductById(Long.parseLong(productId));
-        List<Product> shoppingCartList = (List<Product>) session.getAttribute(SHOPPING_CART_ITEMS);
+        List<Product> shoppingCartList;
+        Boolean firstItemInCart = Boolean.FALSE;
+
+        if (session.getAttribute(PRODUCT_LIST) != null) {
+            shoppingCartList = (List<Product>) session.getAttribute(PRODUCT_LIST);
+            firstItemInCart = Boolean.TRUE;
+
+        } else {
+           shoppingCartList = (List<Product>) session.getAttribute(SHOPPING_CART_ITEMS);
+        }
         List<Product> duplicateElements = findAllDuplicateProducts(shoppingCartList, currentProduct);
 
-        if (duplicateElements != null) {
+        if (duplicateElements != null || duplicateElements.isEmpty()) {
             shoppingCartList.removeAll(duplicateElements);
             duplicateElements.remove(0);
             shoppingCartList.addAll(duplicateElements);
+
         } else {
 
-            throw new BullShopError("System error. Trying to delete products from a null list.");
+            throw new BullShopError("System error. Trying to delete products from a null or empty list.");
+        }
+
+        if (firstItemInCart) {
+            session.setAttribute(PRODUCT_LIST, shoppingCartList);
         }
         session.setAttribute(SHOPPING_CART_ITEMS, shoppingCartList);
 

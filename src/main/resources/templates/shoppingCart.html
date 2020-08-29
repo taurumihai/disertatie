@@ -71,7 +71,7 @@
         <div class="container">
             <h4>Cos cumparaturi <span class="price" style="color:black"><i class="fa fa-shopping-cart"></i></span></h4>
 
-            <div th:if="${emptyCart != null}">
+            <div th:if="${emptyCart != null && (productList == null || productList.empty)}">
                 <span th:text="${emptyCart}"></span>
             </div>
 
