@@ -50,6 +50,7 @@ public class ShoppingCartController {
     private static final String INSUFFICIENT_STOCK  = "insufficentStock";
     private static final String TOTAL_NUMBER_OF_PRODUCTS = "totalNumberOfProducts";
     private static final String SHOPPING_CART_ITEMS = "shoppingCartItems";
+    private static final String NO_PRODUCTS = "noProducts";
 
     @SuppressWarnings("unchecked")
     @RequestMapping("/shoppingCart")
@@ -73,6 +74,11 @@ public class ShoppingCartController {
         if ((session.getAttribute(INSUFFICIENT_STOCK)) != null) {
 
             model.addAttribute(INSUFFICIENT_STOCK, session.getAttribute(INSUFFICIENT_STOCK));
+        }
+
+        if ((session.getAttribute(NO_PRODUCTS)) != null) {
+
+            model.addAttribute(NO_PRODUCTS, session.getAttribute(NO_PRODUCTS));
         }
 
         productList = (List<Product>) session.getAttribute(PRODUCT_LIST);
@@ -119,6 +125,12 @@ public class ShoppingCartController {
 
         if (loggedUser != null && loggedUser.getRoles() != rolesService.findRoleById((long) 2)) {
             checkAddress = addressService.findAddressByUserId(loggedUser.getId());
+        }
+
+        if (productList == null || productList.isEmpty()) {
+            model.addAttribute(NO_PRODUCTS, "Nu puteti continua comanda deaorece nu aveti niciun produs in cos.");
+            session.setAttribute(NO_PRODUCTS, model.getAttribute(NO_PRODUCTS));
+            return "redirect:/shoppingCart";
         }
 
         if (StringUtils.isNullOrEmpty(deliveryAddress) || StringUtils.isNullOrEmpty(county) ||
